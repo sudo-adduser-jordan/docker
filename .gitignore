@@ -1,4 +1,14 @@
+.env
+
 data
 kuma
+dockage
 pgadmin
 postgres
+nginx-proxy-manager
+
+headscale/*
+!headscale/config.yaml
+
+headplane/*   
+!headplane/config.yaml

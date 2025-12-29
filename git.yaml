@@ -1,0 +1,45 @@
+services:
+  forgejo:
+    restart: always
+    image: codeberg.org/forgejo/forgejo:13
+    ports:
+      - 3000:3000
+      - 222:22
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+    volumes:
+      - ./forgejo:/data
+      - /etc/localtime:/etc/localtime:ro
+
+  woodpecker:
+    restart: always
+    image: woodpeckerci/woodpecker-server:v3
+    ports:
+      - 8000:8000
+    volumes:
+      - ./woodpecker:/var/lib/woodpecker/
+    environment:
+      - WOODPECKER_FORGEJO=true
+      - WOODPECKER_HOST=http://localhost:8000
+      - WOODPECKER_FORGEJO_URL=http://localhost:3000
+      - WOODPECKER_FORGEJO_CLIENT=e126089f-7752-4754-9b72-fd27441f0795
+      - WOODPECKER_FORGEJO_SECRET=gto_qybmshuvc3aednywyup74fgzzf6336fmf3boeikwdelhysu7qq5a
+    depends_on:
+      - forgejo
+
+  woodpecker-agent:
+    command: agent
+    restart: always
+    networks:
+      - home
+    image: woodpeckerci/woodpecker-agent:v3
+    volumes:
+      - ./woodpecker/agent-config:/etc/woodpecker
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WOODPECKER_SERVER=woodpecker-server:9000
+      - WOODPECKER_AGENT_SECRET=gto_qybmshuvc3aednywyup74fgzzf6336fmf3boeikwdelhysu7qq5a
+      - WOODPECKER_BACKEND_DOCKER_NETWORK=home
+    depends_on:
+      - woodpecker

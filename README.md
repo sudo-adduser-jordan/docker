@@ -25,3 +25,19 @@ sudo docker ps
  sudo docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 7090e8a3c57a
 
 
+docker container prune -f
+
+
+docker ps -q | xargs -r docker kill
+sudo docker kill containername
+
+
+
+openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout selfsigned.pem -out selfsigned.crt
+
+sudo docker exec -it headscale headscale apikeys create --expiration 90d
+
+sudo docker exec -it headscale headscale users create user1
+sudo docker exec -it headscale headscale pre-authkeys create --user user1
+
+
