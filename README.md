@@ -41,3 +41,5 @@ sudo docker exec -it headscale headscale users create user1
 sudo docker exec -it headscale headscale pre-authkeys create --user user1
 
 
+https://github.com/karam-ajaj/atlas
+https://github.com/henrygd/beszel
