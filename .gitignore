@@ -1,6 +1,5 @@
 .env
-*.crt
-*.pem
+
 
 data
 kuma

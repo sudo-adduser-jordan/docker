@@ -1,42 +1,18 @@
 services:
 
-  proxy:
-    image: 'docker.io/jc21/nginx-proxy-manager:latest'
+  caddy:
+    image: caddy:latest
     restart: unless-stopped
     ports:
-      # - '80:80'
-      - '81:81'
-      - '443:443'
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
     volumes:
-      - ./nginx-proxy-manager/data:/data
-      - ./nginx-proxy-manager/letsencrypt:/etc/letsencrypt
-    networks:
-      - home
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./site:/srv
+      - caddy_data:/data
+      - caddy_config:/config
 
-  docker:
-    image: louislam/dockge:1
-    restart: unless-stopped
-    ports:
-      - 1024:5001
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./dockage/data:/app/data
-      - ./dockage/opt/stacks:/opt/stacks
-    environment:
-      - DOCKGE_STACKS_DIR=./dockage/opt/stacks
-      - DOCKGE_ENABLE_CONSOLE=true
-    networks:
-      - home
-
-  uptime:
-    image: louislam/uptime-kuma:1
-    restart: unless-stopped
-    volumes:
-      - ./kuma:/app/data
-    ports:
-      - 1025:3001
-    networks:
-      - home
-
-networks:
-  home:
+volumes:
+  caddy_data:
+  caddy_config:

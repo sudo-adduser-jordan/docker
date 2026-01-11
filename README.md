@@ -43,3 +43,18 @@ sudo docker exec -it headscale headscale pre-authkeys create --user user1
 
 https://github.com/karam-ajaj/atlas
 https://github.com/henrygd/beszel
+
+
+
+docker compose cp \
+    caddy:/data/caddy/pki/authorities/local/root.crt \
+    /usr/local/share/ca-certificates/root.crt \
+  && sudo update-ca-certificates
+
+
+
+  sudo mkdir -p /usr/local/share/ca-certificates
+docker compose cp \
+    caddy:/data/caddy/pki/authorities/local/root.crt \
+    /usr/local/share/ca-certificates/root.crt \
+&& sudo update-ca-certificates
