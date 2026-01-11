@@ -27,3 +27,16 @@ https://github.com/karam-ajaj/atlas
 https://github.com/henrygd/beszel
 
 ```
+
+
+# todo
+```sh
+
+- web stack
+- adgaurd
+- vpn
+- paas
+- 
+
+
+```
