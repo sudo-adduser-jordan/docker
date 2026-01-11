@@ -1,19 +1,23 @@
 services:
 
-  nginx-proxy-manager:
+  proxy:
     image: 'docker.io/jc21/nginx-proxy-manager:latest'
     restart: unless-stopped
+    environment:
+      INITIAL_ADMIN_EMAIL: admin@admin.com
+      INITIAL_ADMIN_PASSWORD: admin
     ports:
       # - '80:80'
       - '81:81'
       - '443:443'
     volumes:
+      - ./nginx-proxy-manager/data/nginx/proxy-host:/data
       - ./nginx-proxy-manager/data:/data
       - ./nginx-proxy-manager/letsencrypt:/etc/letsencrypt
     networks:
       - home
 
-  dockage:
+  docker:
     image: louislam/dockge:1
     restart: unless-stopped
     ports:
@@ -28,7 +32,7 @@ services:
     networks:
       - home
 
-  kuma:
+  uptime:
     image: louislam/uptime-kuma:1
     restart: unless-stopped
     volumes:

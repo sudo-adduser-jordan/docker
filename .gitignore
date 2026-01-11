@@ -1,19 +1,16 @@
-
-*.crt
-*.pem
+selfsigned.crt
+selfsigned.pem
 
 .env
-
 
 data
 kuma
 dockage
 pgadmin
 postgres
+
 nginx-proxy-manager
 
-headscale/*
-!headscale/config.yaml
+!nginx-proxy-manager/data/nginx/proxy_host/*
 
-headplane/*   
-!headplane/config.yaml
+
