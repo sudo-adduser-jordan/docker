@@ -4,7 +4,7 @@ services:
     image: 'docker.io/jc21/nginx-proxy-manager:latest'
     restart: unless-stopped
     ports:
-      - '80:80'
+      # - '80:80'
       - '81:81'
       - '443:443'
     volumes:
@@ -17,7 +17,7 @@ services:
     image: louislam/dockge:1
     restart: unless-stopped
     ports:
-      - 5001:5001
+      - 1024:5001
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./dockage/data:/app/data
@@ -34,7 +34,7 @@ services:
     volumes:
       - ./kuma:/app/data
     ports:
-      - 3001:3001
+      - 1025:3001
     networks:
       - home
 
