@@ -1,17 +1,15 @@
 .env
 
-
 data
-kuma
-dockage
-pgadmin
-postgres
 
-nginx-proxy-manager/**
-!nginx-proxy-manager/data
-!nginx-proxy-manager/data/nginx
-!nginx-proxy-manager/data/nginx/proxy_host
-!nginx-proxy-manager/data/nginx/proxy_host/*
+beszel_data
+certs
+dockage
+forgejo
+kuma
+# uptime
+# git
+metrics
 
 
 
