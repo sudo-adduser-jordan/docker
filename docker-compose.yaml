@@ -78,3 +78,10 @@ services:
       - 8090:8090
     volumes:
       - ./beszel_data:/beszel_data
+
+
+
+
+
+
+      
