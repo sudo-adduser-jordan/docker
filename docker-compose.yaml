@@ -1,3 +1,11 @@
+
+volumes:
+  proxy_data:
+  portainer_data:
+  atlas_data:
+  git_data:
+  metrics_data:
+
 networks:
   home:
   forgejo:
@@ -13,19 +21,6 @@ services:
       - ./certs:/etc/ssl/certs
     networks:
       - home
-
-  docker:
-    image: louislam/dockge:1
-    restart: unless-stopped
-    ports:
-      - 5001:5001
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./dockage/data:/app/data
-      - ./dockage/opt/stacks:/opt/stacks
-    environment:
-      - DOCKGE_STACKS_DIR=./dockage/opt/stacks
-      - DOCKGE_ENABLE_CONSOLE=true
 
   atlas:
     image: keinstien/atlas:latest
@@ -43,15 +38,16 @@ services:
       - DEEPSCAN_INTERVAL=7200
       - SCAN_SUBNETS=192.168.1.0/24,10.0.0.0/24
 
-  uptime:
-    image: louislam/uptime-kuma:1
-    restart: unless-stopped
-    volumes:
-      - ./kuma:/app/data
+  docker:
+    image: portainer/portainer-ce:lts
+    container_name: portainer
+    restart: always
     ports:
-      - 3001:3001
-    networks:
-      - home
+      - "8000:8000"
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
 
   git:
     image: codeberg.org/forgejo/forgejo:13
@@ -78,10 +74,3 @@ services:
       - 8090:8090
     volumes:
       - ./beszel_data:/beszel_data
-
-
-
-
-
-
-      
