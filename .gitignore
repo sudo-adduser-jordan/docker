@@ -2,13 +2,9 @@
 
 data
 
-beszel_data
 certs
-dockage
-forgejo
-kuma
-# uptime
-# git
+docker
+git
 metrics
 
 

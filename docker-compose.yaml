@@ -1,26 +1,22 @@
 
 volumes:
-  proxy_data:
-  portainer_data:
-  atlas_data:
-  git_data:
-  metrics_data:
+  git:
+  proxy:
+  atlas:
+  docker:
+  metrics:
 
 networks:
   home:
-  forgejo:
-    external: false
 
 services:
   proxy:
     image: nginx:latest
     ports:
-      - "443:443"
+      - 443:443
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ./certs:/etc/ssl/certs
-    networks:
-      - home
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
 
   atlas:
     image: keinstien/atlas:latest
@@ -40,37 +36,34 @@ services:
 
   docker:
     image: portainer/portainer-ce:lts
-    container_name: portainer
     restart: always
     ports:
-      - "8000:8000"
-      - "9443:9443"
+      - 8000:8000
+      - 9443:9443
     volumes:
+      - ./docker:/data
       - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_data:/data
 
   git:
     image: codeberg.org/forgejo/forgejo:13
-    container_name: forgejo
     environment:
       - USER_UID=1000
       - USER_GID=1000
     restart: always
-    networks:
-      - forgejo
     volumes:
-      - ./forgejo:/data
+      - ./git:/data
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
-      - '3000:3000'
-      - '222:22'
+      - 3000:3000
+      - 222:22
 
   metrics:
     image: henrygd/beszel
-    container_name: beszel
     restart: unless-stopped
     ports:
       - 8090:8090
     volumes:
-      - ./beszel_data:/beszel_data
+      - ./metrics:/beszel_data
+
+
