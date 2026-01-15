@@ -1,21 +1,26 @@
 # docker server
 ```sh
 git https://github.com/sudo-adduser-jordan/docker
+cd docker
+mkdir -p certs
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./certs/nginx.key -out ./certs/nginx.crt
 docker compose up -d
+```
+
+```sh
+source <(curl https://github.com/sudo-adduser-jordan/docker/install)
 ```
 
 # programs
 ```sh
-beszel # metrics.exampledomain.com
-dockge # docker.exampledomain.com
+nginx # nginx.exampledomain.com
+network # network.exampledomain.com
+portainer # docker.exampledomain.com
 forgejo # git.exampledomain.com
-kuma # uptime.exampledomain.com
-
 ```
 
 # commands
 ```sh
-# generate nginx certifications
 mkdir -p certs
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./certs/nginx.key -out ./certs/nginx.crt
 ```
@@ -24,19 +29,12 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./certs/nginx.key -o
 ```sh
 https://hub.docker.com/
 https://github.com/karam-ajaj/atlas
-https://github.com/henrygd/beszel
 
 ```
 
-
 # todo
 ```sh
-
-- web stack
-- adgaurd
 - vpn
-- paas
-- 
-
-
+- adgaurd
+- cd
 ```
