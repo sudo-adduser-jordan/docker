@@ -47,12 +47,38 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
 
-  metrics:
-    image: henrygd/beszel
-    restart: unless-stopped
+  adblock:
+    image: pihole/pihole:latest
     ports:
-      - 8090:8090
+      # - 53:53/tcp
+      # - 53:53/udp
+      # - 67:67/udp
+      # - 80:80/tcp
+      # - 443:443/tcp
+
+      - 53:53/tcp
+      - 53:53/udp
+      # - 67:67/udp
+      # - 80:80
+      # - 443:443
+      # - 1053:53/tcp
+      # - 1053:53/udp
+      - 8080:80
+      - 8443:443
+
+
+
+    # - 1053:53/tcp
+    # - 1053:53/udp
+    # - 8080:80/tcp     
+    environment:
+      TZ: America/Vancouver
+      FTLCONF_webserver_api_password: x
+      FTLCONF_dns_listeningMode: ALL
     volumes:
-      - ./metrics:/beszel_data
-
-
+      - ./adblock:/etc/pihole
+    cap_add:
+      - NET_ADMIN
+      - SYS_TIME
+      - SYS_NICE
+    restart: unless-stopped
