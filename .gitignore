@@ -2,11 +2,11 @@
 
 data
 
+git
+npm
 certs
 docker
-git
 adblock
-metrics
 
 
 

@@ -1,14 +1,32 @@
 services:
+
   proxy:
-    image: nginx:latest
+    container_name: proxy
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
     ports:
-      - 443:443
+      - '80:80' # Public HTTP Port
+      - '443:443' # Public HTTPS Port
+      - '81:81' # Admin Web Port
+    environment:
+      INITIAL_ADMIN_PASSWORD: changemenow
+      INITIAL_ADMIN_EMAIL: test@gmail.com
+      TZ: "America/Vancouver"
     volumes:
-      - ./certs:/etc/ssl/certs
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./npm:/data
+      - ./npm/letsencrypt:/etc/letsencrypt
+
+  # proxy:
+  #   image: nginx:latest
+  #   ports:
+  #     - 443:443
+  #   volumes:
+  #     - ./certs:/etc/ssl/certs
+  #     - ./nginx.conf:/etc/nginx/conf.d/default.conf
 
   atlas:
     image: keinstien/atlas:latest
+    container_name: network
     network_mode: host
     cap_add:
       - NET_RAW
@@ -24,6 +42,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   docker:
+    container_name: docker
     image: portainer/portainer-ce:lts
     restart: always
     ports:
@@ -34,6 +53,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   git:
+    container_name: git
     image: codeberg.org/forgejo/forgejo:13
     restart: always
     ports:
@@ -49,15 +69,11 @@ services:
 
   adblock:
     image: pihole/pihole:latest
+    container_name: adblock
     network_mode: host
-    ports:      
-      - "53:53/tcp"
-      - "53:53/udp"
-      - "80:80/tcp"
-      - "443:443/tcp"
-      # - "67:67/udp"
-      #- "123:123/udp"
     environment:
+      WEB_PORT: 8080  
+      FTLCONF_webserver_port: 8080
       TZ: America/Vancouver
       FTLCONF_webserver_api_password: x
       FTLCONF_dns_listeningMode: ALL
@@ -68,3 +84,64 @@ services:
       - SYS_TIME
       - SYS_NICE
     restart: unless-stopped
+
+  mongo:
+    image: mongo
+    container_name: build-database
+    labels:
+      komodo.skip: # Prevent Komodo from stopping with StopAllContainers
+    command: --quiet --wiredTigerCacheSizeGB 0.25
+    restart: unless-stopped
+    # ports:
+    #   - 27017:27017
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${KOMODO_DB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${KOMODO_DB_PASSWORD}
+  
+  core:
+    image: ghcr.io/moghtech/komodo-core:${COMPOSE_KOMODO_IMAGE_TAG:-latest}
+    container_name: build
+    labels:
+      komodo.skip: # Prevent Komodo from stopping with StopAllContainers
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    ports:
+      - 9120:9120
+    env_file: 
+      - ./.env
+    environment:
+      KOMODO_DATABASE_ADDRESS: mongo:27017
+      KOMODO_DATABASE_USERNAME: ${KOMODO_DB_USERNAME}
+      KOMODO_DATABASE_PASSWORD: ${KOMODO_DB_PASSWORD}
+    volumes:
+      - ${COMPOSE_KOMODO_BACKUPS_PATH}:/backups
+
+  periphery:
+    image: ghcr.io/moghtech/komodo-periphery:${COMPOSE_KOMODO_IMAGE_TAG:-latest}
+    container_name: build-periphery
+    labels:
+      komodo.skip: # Prevent Komodo from stopping with StopAllContainers
+    restart: unless-stopped
+    env_file: 
+      - ./.env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /proc:/proc
+      - ${PERIPHERY_ROOT_DIRECTORY:-/etc/komodo}:${PERIPHERY_ROOT_DIRECTORY:-/etc/komodo}
+
+  speedtest:
+      restart: unless-stopped
+      container_name: speedtest
+      ports:
+          - '3002:3000'
+          - '3001:3001'
+      image: openspeedtest/latest
+
+volumes:
+  # Mongo
+  mongo-data:
+  mongo-config:
