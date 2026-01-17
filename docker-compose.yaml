@@ -88,12 +88,12 @@ services:
       - TZ=America/Vancouver
       - FTLCONF_webserver_api_password=x
       - FTLCONF_dns_listeningMode=ALL
-    volumes:
-      - adblock:/etc/pihole
     cap_add:
       - NET_ADMIN
       - SYS_TIME
       - SYS_NICE
+    volumes:
+      - adblock:/etc/pihole
 
   mongo:
     image: mongo
