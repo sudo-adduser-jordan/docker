@@ -1,28 +1,38 @@
+volumes:
+  npm:
+  git:
+  komodo:
+  adblock:
+  portainer:
+  letsencrypt:
+  mongo:
+  mongo-config:
+
 services:
 
-  proxy:
-    container_name: proxy
-    image: 'jc21/nginx-proxy-manager:latest'
-    restart: unless-stopped
-    ports:
-      - '80:80' # Public HTTP Port
-      - '443:443' # Public HTTPS Port
-      - '81:81' # Admin Web Port
-    environment:
-      INITIAL_ADMIN_PASSWORD: changemenow
-      INITIAL_ADMIN_EMAIL: test@gmail.com
-      TZ: "America/Vancouver"
-    volumes:
-      - ./npm:/data
-      - ./npm/letsencrypt:/etc/letsencrypt
-
-  # proxy:
+  # nginx:
   #   image: nginx:latest
   #   ports:
   #     - 443:443
   #   volumes:
   #     - ./certs:/etc/ssl/certs
   #     - ./nginx.conf:/etc/nginx/conf.d/default.conf
+
+  npm:
+    container_name: proxy
+    image: jc21/nginx-proxy-manager:latest
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443 
+      - 81:81 
+    environment:
+      INITIAL_ADMIN_PASSWORD: changemenow
+      INITIAL_ADMIN_EMAIL: test@gmail.com
+      TZ: "America/Vancouver"
+    volumes:
+      - npm:/data
+      - letsencrypt:/etc/letsencrypt
 
   atlas:
     image: keinstien/atlas:latest
@@ -41,7 +51,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
-  docker:
+  portainer:
     container_name: docker
     image: portainer/portainer-ce:lts
     restart: always
@@ -49,7 +59,7 @@ services:
       - 8000:8000
       - 9443:9443
     volumes:
-      - ./docker:/data
+      - portainer:/data
       - /var/run/docker.sock:/var/run/docker.sock
 
   git:
@@ -63,27 +73,27 @@ services:
       - USER_UID=1000
       - USER_GID=1000
     volumes:
-      - ./git:/data
+      - git:/data
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
 
   adblock:
     image: pihole/pihole:latest
     container_name: adblock
+    restart: unless-stopped
     network_mode: host
     environment:
-      WEB_PORT: 8080  
-      FTLCONF_webserver_port: 8080
-      TZ: America/Vancouver
-      FTLCONF_webserver_api_password: x
-      FTLCONF_dns_listeningMode: ALL
+      - WEB_PORT=8080  
+      - FTLCONF_webserver_port=8080
+      - TZ=America/Vancouver
+      - FTLCONF_webserver_api_password=x
+      - FTLCONF_dns_listeningMode=ALL
     volumes:
-      - ./adblock:/etc/pihole
+      - adblock:/etc/pihole
     cap_add:
       - NET_ADMIN
       - SYS_TIME
       - SYS_NICE
-    restart: unless-stopped
 
   mongo:
     image: mongo
@@ -94,13 +104,12 @@ services:
     restart: unless-stopped
     # ports:
     #   - 27017:27017
-    volumes:
-      - mongo-data:/data/db
-      - mongo-config:/data/configdb
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${KOMODO_DB_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${KOMODO_DB_PASSWORD}
-  
+    volumes:
+      - mongo:/data/db
+      - mongo-config:/data/configdb
   core:
     image: ghcr.io/moghtech/komodo-core:${COMPOSE_KOMODO_IMAGE_TAG:-latest}
     container_name: build
@@ -118,7 +127,7 @@ services:
       KOMODO_DATABASE_USERNAME: ${KOMODO_DB_USERNAME}
       KOMODO_DATABASE_PASSWORD: ${KOMODO_DB_PASSWORD}
     volumes:
-      - ${COMPOSE_KOMODO_BACKUPS_PATH}:/backups
+      - komodo:/backups
 
   periphery:
     image: ghcr.io/moghtech/komodo-periphery:${COMPOSE_KOMODO_IMAGE_TAG:-latest}
@@ -126,22 +135,16 @@ services:
     labels:
       komodo.skip: # Prevent Komodo from stopping with StopAllContainers
     restart: unless-stopped
-    env_file: 
-      - ./.env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /proc:/proc
-      - ${PERIPHERY_ROOT_DIRECTORY:-/etc/komodo}:${PERIPHERY_ROOT_DIRECTORY:-/etc/komodo}
+      - /etc/komodo:/etc/komodo
 
   speedtest:
       restart: unless-stopped
       container_name: speedtest
       ports:
-          - '3002:3000'
-          - '3001:3001'
+          - 3002:3000
+          - 3001:3001
       image: openspeedtest/latest
 
-volumes:
-  # Mongo
-  mongo-data:
-  mongo-config:

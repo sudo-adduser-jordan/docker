@@ -1,20 +1,13 @@
-# Loopback entries; do not change.
-# For historical reasons, localhost precedes localhost.localdomain:
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 
 10.0.0.5 dblocks.net 
-10.0.0.5 git.dblocks.net 
-10.0.0.5 docker.dblocks.net 
 10.0.0.5 nginx.dblocks.net 
+10.0.0.5 network.dblocks.net
+10.0.0.5 docker.dblocks.net 
+10.0.0.5 git.dblocks.net 
 10.0.0.5 uptime.dblocks.net 
 10.0.0.5 metrics.dblocks.net 
-10.0.0.5 network.dblocks.net
 10.0.0.5 build.dblocks.net
-
 10.0.0.5 adblock.dblocks.net
-10.0.0.5 speed.dblocks.net
-
-# See hosts(5) for proper format and other examples:
-# 192.168.1.10 foo.example.org foo
-# 192.168.1.13 bar.example.org bar
+10.0.0.5 speedtest.dblocks.net
