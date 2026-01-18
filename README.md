@@ -20,8 +20,7 @@ forgejo # git.exampledomain.com
 # commands
 ```sh
 
-
-
+git config --global http.sslCAInfo ~/git-dblocks-net.pem 
 
 ```
 
