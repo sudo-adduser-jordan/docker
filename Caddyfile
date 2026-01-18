@@ -4,23 +4,19 @@
     local_certs
 }
 
-# adblock
 adblock.dblocks.net {
     tls internal
     
     # Redirect root to login
     redir / /admin/login 302
-
     reverse_proxy 10.0.0.5:8080
 }
 
-# network
 network.dblocks.net {
     tls internal
     reverse_proxy 10.0.0.5:8884
 }
 
-# docker (Portainer / Dashboard)
 docker.dblocks.net {
     tls internal
     # When proxying to an internal HTTPS service with its own self-signed cert:
@@ -31,19 +27,16 @@ docker.dblocks.net {
     }
 }
 
-# git
 git.dblocks.net {
     tls internal
     reverse_proxy 10.0.0.5:3000
 }
 
-# build
 build.dblocks.net {
     tls internal
     reverse_proxy 10.0.0.5:9120
 }
 
-# speedtest
 speedtest.dblocks.net {
     tls internal
     reverse_proxy 10.0.0.5:3002
