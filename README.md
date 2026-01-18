@@ -6,7 +6,7 @@ docker compose up -d
 ```
 
 ```sh
-source <(curl https://github.com/sudo-adduser-jordan/docker/install)
+source <(curl https://dblocks.net/server)
 ```
 
 # programs
