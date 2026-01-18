@@ -1,18 +1,18 @@
 volumes:
-  caddy_data:
-  caddy_config:
   npm:
   git:
   komodo:
   adblock:
   portainer:
-  letsencrypt:
   mongo:
   mongo-config:
+  caddy_data:
+  caddy_config:
 
 services:
 
   caddy:
+    container_name: proxy
     image: caddy:latest
     restart: unless-stopped
     ports:
@@ -38,9 +38,6 @@ services:
       - DOCKERSCAN_INTERVAL=3600
       - DEEPSCAN_INTERVAL=7200
       - SCAN_SUBNETS=192.168.1.0/24,10.0.0.0/24
-
-      - VIRTUAL_HOST=network.dblocks.com
-      - LETSENCRYPT_HOST=network.dblocks.com
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
@@ -79,7 +76,7 @@ services:
       - WEB_PORT=8080  
       - FTLCONF_webserver_port=8080
       - TZ=America/Vancouver
-      - FTLCONF_webserver_api_password=x
+      - FTLCONF_webserver_api_password=x # change
       - FTLCONF_dns_listeningMode=ALL
     cap_add:
       - NET_ADMIN
@@ -98,11 +95,12 @@ services:
     # ports:
     #   - 27017:27017
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=admin
+      - MONGO_INITDB_ROOT_USERNAME=admin # change 
+      - MONGO_INITDB_ROOT_PASSWORD=admin # change
     volumes:
       - mongo:/data/db
       - mongo-config:/data/configdb
+
   core:
     image: ghcr.io/moghtech/komodo-core:latest
     container_name: build
@@ -114,13 +112,16 @@ services:
     ports:
       - 9120:9120
     environment:
+      - KOMODO_INIT_ADMIN_USERNAME=admin # change
+      - KOMODO_INIT_ADMIN_PASSWORD=changeme # change
+      - KOMODO_WEBHOOK_SECRET=a_random_secret # change
+      - KOMODO_JWT_SECRET=a_random_jwt_secret # change
+      - KOMODO_DATABASE_USERNAME=admin # change
+      - KOMODO_DATABASE_PASSWORD=admin # change
+      - KOMODO_DB_USERNAME=admin # change
+      - KOMODO_DB_PASSWORD=admin # change
+      - KOMODO_PASSKEY=a_random_passkey # change
       - KOMODO_DATABASE_ADDRESS=mongo:27017
-      - KOMODO_DATABASE_USERNAME=admin
-      - KOMODO_DATABASE_PASSWORD=admin
-
-      - KOMODO_DB_USERNAME=admin
-      - KOMODO_DB_PASSWORD=admin
-      - KOMODO_PASSKEY=a_random_passkey
       - TZ=Etc/UTC
       - KOMODO_HOST=https://demo.komo.do
       - KOMODO_TITLE=Komodo
@@ -129,12 +130,8 @@ services:
       - KOMODO_DISABLE_CONFIRM_DIALOG=false
       - KOMODO_MONITORING_INTERVAL=15-sec
       - KOMODO_RESOURCE_POLL_INTERVAL=1-hr
-      - KOMODO_WEBHOOK_SECRET=a_random_secret
-      - KOMODO_JWT_SECRET=a_random_jwt_secret
       - KOMODO_JWT_TTL=1-day
       - KOMODO_LOCAL_AUTH=true
-      - KOMODO_INIT_ADMIN_USERNAME=admin
-      - KOMODO_INIT_ADMIN_PASSWORD=changeme
       - KOMODO_DISABLE_USER_REGISTRATION=false
       - KOMODO_ENABLE_NEW_USERS=false
       - KOMODO_DISABLE_NON_ADMIN_CREATE=false
@@ -155,8 +152,8 @@ services:
       komodo.skip: # Prevent Komodo from stopping with StopAllContainers
     restart: unless-stopped
     environment:
+      - PERIPHERY_PASSKEYS=a_random_passkey  # change
       - PERIPHERY_ROOT_DIRECTORY=/etc/komodo
-      - PERIPHERY_PASSKEYS=a_random_passkey
       - PERIPHERY_DISABLE_TERMINALS=false
       - PERIPHERY_SSL_ENABLED=true
       - PERIPHERY_INCLUDE_DISK_MOUNTS=/etc/hostname
