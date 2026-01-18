@@ -1,0 +1,50 @@
+{
+    # Global options: Use internal CA for all sites by default
+    # This prevents Caddy from trying to reach Let's Encrypt for .net domains
+    local_certs
+}
+
+# adblock
+adblock.dblocks.net {
+    tls internal
+    
+    # Redirect root to login
+    redir / /admin/login 302
+
+    reverse_proxy 10.0.0.5:8080
+}
+
+# network
+network.dblocks.net {
+    tls internal
+    reverse_proxy 10.0.0.5:8884
+}
+
+# docker (Portainer / Dashboard)
+docker.dblocks.net {
+    tls internal
+    # When proxying to an internal HTTPS service with its own self-signed cert:
+    reverse_proxy https://10.0.0.5:9443 {
+        transport http {
+            tls_insecure_skip_verify
+        }
+    }
+}
+
+# git
+git.dblocks.net {
+    tls internal
+    reverse_proxy 10.0.0.5:3000
+}
+
+# build
+build.dblocks.net {
+    tls internal
+    reverse_proxy 10.0.0.5:9120
+}
+
+# speedtest
+speedtest.dblocks.net {
+    tls internal
+    reverse_proxy 10.0.0.5:3002
+}

@@ -2,7 +2,6 @@
 ```sh
 git https://github.com/sudo-adduser-jordan/docker
 cd docker
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout nginx.key -out nginx.crt
 docker compose up -d
 ```
 
@@ -20,12 +19,6 @@ forgejo # git.exampledomain.com
 
 # commands
 ```sh
-git config --global http."https://git.dblocks.net/".sslCAInfo /path/to/your/cert.pem
-
-mkdir -p certs
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./certs/nginx.key -out ./certs/nginx.crt
-
-systemctl disable systemd-resolved.service
 ```
 
 # resources

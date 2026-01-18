@@ -1,4 +1,6 @@
 volumes:
+  caddy_data:
+  caddy_config:
   npm:
   git:
   komodo:
@@ -10,30 +12,18 @@ volumes:
 
 services:
 
-  nginx:
-    image: nginx:latest
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
     ports:
-      - 443:443
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
     volumes:
-      - ./nginx.crt:/etc/ssl/certs/nginx.crt
-      - ./nginx.key:/etc/ssl/certs/nginx.key
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-
-  # npm:
-  #   container_name: proxy
-  #   image: jc21/nginx-proxy-manager:latest
-  #   restart: unless-stopped
-  #   ports:
-  #     - 80:80
-  #     - 443:443 
-  #     - 81:81 
-  #   environment:
-  #     INITIAL_ADMIN_PASSWORD: changemenow
-  #     INITIAL_ADMIN_EMAIL: test@gmail.com
-  #     TZ: "America/Vancouver"
-  #   volumes:
-  #     - npm:/data
-  #     - letsencrypt:/etc/letsencrypt
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      # - ./site:/srv
+      - caddy_data:/data
+      - caddy_config:/config
 
   atlas:
     image: keinstien/atlas:latest
@@ -49,6 +39,9 @@ services:
       - DOCKERSCAN_INTERVAL=3600
       - DEEPSCAN_INTERVAL=7200
       - SCAN_SUBNETS=192.168.1.0/24,10.0.0.0/24
+
+      - VIRTUAL_HOST=network.dblocks.com
+      - LETSENCRYPT_HOST=network.dblocks.com
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
