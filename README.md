@@ -19,8 +19,8 @@ forgejo # git.exampledomain.com
 
 # commands
 ```sh
-echo | openssl s_client -servername server -connect 10.0.0.5:3000 | openssl x509 -outform PEM > git-dblock-net.pem
-git config --global http.sslCAInfo ~/git-dblocks-net.pem 
+
+git config --global http.sslCAInfo ~/docker/git-dblocks-net.pem 
 
 ```
 

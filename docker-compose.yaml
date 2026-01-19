@@ -62,9 +62,7 @@ services:
     environment:
       - USER_UID=1000
       - USER_GID=1000
-      # - SSL_CERT_FILE=/etc/ssl/certs/caddy-root.crt
     volumes:
-      # - caddy_data:/etc/ssl/certs/caddy-root.crt:ro # Mount the cert
       - git:/data
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro

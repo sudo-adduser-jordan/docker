@@ -11,3 +11,14 @@
 10.0.0.5 build.dblocks.net
 10.0.0.5 adblock.dblocks.net
 10.0.0.5 speedtest.dblocks.net
+
+# 127.0.0.1 dblocks.net 
+# 127.0.0.1 nginx.dblocks.net 
+# 127.0.0.1 network.dblocks.net
+# 127.0.0.1 docker.dblocks.net 
+# 127.0.0.1 git.dblocks.net 
+# 127.0.0.1 uptime.dblocks.net 
+# 127.0.0.1 metrics.dblocks.net 
+# 127.0.0.1 build.dblocks.net
+# 127.0.0.1 adblock.dblocks.net
+# 127.0.0.1 speedtest.dblocks.net
