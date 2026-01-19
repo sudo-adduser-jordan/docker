@@ -20,13 +20,15 @@ forgejo # git.exampledomain.com
 ```sh
 git config --global http.sslCAInfo /root/git-dblocks-net.pem 
 git config --system http.sslCAInfo /root/git-dblocks-net.pem 
+
+docker exec -it git-runner forgejo-runner register
 ```
 
 # resources
 ```sh
 https://hub.docker.com/
 https://github.com/karam-ajaj/atlas
-
+https://forgejo.org/docs/v14.0/admin/actions/runner-installation/#oci-image-installation
 ```
 
 # todo

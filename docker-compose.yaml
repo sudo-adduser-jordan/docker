@@ -1,4 +1,5 @@
 volumes:
+  git-runner:
   npm:
   git:
   komodo:
@@ -66,6 +67,31 @@ services:
       - git:/data
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
+
+  docker-in-docker:
+    image: docker:dind
+    container_name: git-docker
+    privileged: 'true'
+    command: ['dockerd', '-H', 'tcp://0.0.0.0:2375', '--tls=false']
+    restart: 'unless-stopped'
+
+  runner:
+    image: data.forgejo.org/forgejo/runner:11
+    container_name: git-runner
+    links:
+      - docker-in-docker
+    depends_on:
+      docker-in-docker:
+        condition: service_started
+    environment:
+      DOCKER_HOST: tcp://docker-in-docker:2375
+    user: 1000:1000
+    # user: 1001:1001
+    volumes:
+      - git-runner:/data
+    restart: unless-stopped
+    # command: '/bin/sh -c "while : ; do sleep 1 ; done ;"'
+    command: '/bin/sh -c "sleep 5; forgejo-runner daemon"'
 
   adblock:
     image: pihole/pihole:latest
