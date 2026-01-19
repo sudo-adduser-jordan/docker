@@ -1,7 +1,12 @@
+# dblock 
+networks:
+  network-proxy: 
+  network-internal: 
+
 volumes:
-  git-runner:
   npm:
   git:
+  git-runner:
   komodo:
   adblock:
   portainer:
@@ -16,10 +21,7 @@ services:
     container_name: proxy
     image: caddy:latest
     restart: unless-stopped
-    ports:
-      - 80:80
-      - 443:443
-      - 443:443/udp
+    network_mode: host
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
@@ -33,7 +35,7 @@ services:
       - NET_RAW
       - NET_ADMIN
     environment:
-      - ATLAS_UI_PORT=8884
+      - ATLAS_UI_PORT=1024
       - ATLAS_API_PORT=8885
       - FASTSCAN_INTERVAL=3600
       - DOCKERSCAN_INTERVAL=3600
@@ -42,23 +44,29 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
-  portainer:
-    container_name: docker
-    image: portainer/portainer-ce:lts
-    restart: always
-    ports:
-      - 8000:8000
-      - 9443:9443
+  adblock:
+    image: pihole/pihole:latest
+    container_name: adblock
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - FTLCONF_webserver_port=1025
+      - TZ=America/Vancouver
+      - FTLCONF_webserver_api_password=x # change
+      - FTLCONF_dns_listeningMode=ALL
+    cap_add:
+      - NET_ADMIN
+      - SYS_TIME
+      - SYS_NICE
     volumes:
-      - portainer:/data
-      - /var/run/docker.sock:/var/run/docker.sock
+      - adblock:/etc/pihole
 
   git:
     container_name: git
     image: codeberg.org/forgejo/forgejo:13
     restart: always
     ports:
-      - 3000:3000
+      - 1026:3000
       - 222:22
     environment:
       - USER_UID=1000
@@ -86,40 +94,19 @@ services:
     environment:
       DOCKER_HOST: tcp://docker-in-docker:2375
     user: 1000:1000
-    # user: 1001:1001
     volumes:
       - git-runner:/data
     restart: unless-stopped
     # command: '/bin/sh -c "while : ; do sleep 1 ; done ;"'
     command: '/bin/sh -c "sleep 5; forgejo-runner daemon"'
 
-  adblock:
-    image: pihole/pihole:latest
-    container_name: adblock
-    restart: unless-stopped
-    network_mode: host
-    environment:
-      - WEB_PORT=8080  
-      - FTLCONF_webserver_port=8080
-      - TZ=America/Vancouver
-      - FTLCONF_webserver_api_password=x # change
-      - FTLCONF_dns_listeningMode=ALL
-    cap_add:
-      - NET_ADMIN
-      - SYS_TIME
-      - SYS_NICE
-    volumes:
-      - adblock:/etc/pihole
-
   mongo:
     image: mongo
     container_name: build-database
     labels:
-      komodo.skip: # Prevent Komodo from stopping with StopAllContainers
+      komodo.skip: 
     command: --quiet --wiredTigerCacheSizeGB 0.25
     restart: unless-stopped
-    # ports:
-    #   - 27017:27017
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin # change 
       - MONGO_INITDB_ROOT_PASSWORD=admin # change
@@ -131,12 +118,12 @@ services:
     image: ghcr.io/moghtech/komodo-core:latest
     container_name: build
     labels:
-      komodo.skip: # Prevent Komodo from stopping with StopAllContainers
+      komodo.skip: 
     restart: unless-stopped
     depends_on:
       - mongo
     ports:
-      - 9120:9120
+      - 1027:9120
     environment:
       - KOMODO_INIT_ADMIN_USERNAME=admin # change
       - KOMODO_INIT_ADMIN_PASSWORD=changeme # change
@@ -175,7 +162,7 @@ services:
     image: ghcr.io/moghtech/komodo-periphery:latest
     container_name: build-periphery
     labels:
-      komodo.skip: # Prevent Komodo from stopping with StopAllContainers
+      komodo.skip: 
     restart: unless-stopped
     environment:
       - PERIPHERY_PASSKEYS=a_random_passkey  # change
@@ -190,11 +177,20 @@ services:
       - /proc:/proc
       - /etc/komodo:/etc/komodo
 
-  speedtest:
+  speed:
       restart: unless-stopped
-      container_name: speedtest
+      container_name: speed
       ports:
-          - 3002:3000
-          - 3001:3001
+          - 1028:3000
       image: openspeedtest/latest
+
+  portainer:
+    container_name: docker
+    image: portainer/portainer-ce:lts
+    restart: always
+    ports:
+      - 1029:9443
+    volumes:
+      - portainer:/data
+      - /var/run/docker.sock:/var/run/docker.sock
 

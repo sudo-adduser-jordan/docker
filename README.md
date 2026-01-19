@@ -20,6 +20,7 @@ forgejo # git.exampledomain.com
 ```sh
 git config --global http.sslCAInfo /root/git-dblocks-net.pem 
 git config --system http.sslCAInfo /root/git-dblocks-net.pem 
+git config http.sslVerify false
 
 docker exec -it git-runner forgejo-runner register
 ```
