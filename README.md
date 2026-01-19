@@ -19,9 +19,9 @@ forgejo # git.exampledomain.com
 
 # commands
 ```sh
-
 git config --global http.sslCAInfo ~/docker/git-dblocks-net.pem 
-
+# or
+git config http.sslVerify "false"
 ```
 
 # resources
