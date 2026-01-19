@@ -11,7 +11,6 @@ source <(curl https://dblocks.net/server)
 
 # programs
 ```sh
-nginx # nginx.exampledomain.com
 network # network.exampledomain.com
 portainer # docker.exampledomain.com
 forgejo # git.exampledomain.com
