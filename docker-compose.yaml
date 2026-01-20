@@ -1,17 +1,17 @@
 # dblock 
-networks:
-  network-proxy: 
-  network-internal: 
+
+# networks:
+#   network-proxy: 
+#   network-internal: 
 
 volumes:
-  npm:
+  adblock:
+  portainer:
   git:
   git-runner:
   komodo:
-  adblock:
-  portainer:
-  mongo:
-  mongo-config:
+  komodo_mongo:
+  komodo_mongo_config:
   caddy_data:
   caddy_config:
 
@@ -52,7 +52,7 @@ services:
     environment:
       - FTLCONF_webserver_port=1025
       - TZ=America/Vancouver
-      - FTLCONF_webserver_api_password=x # change
+      - FTLCONF_webserver_api_password=${FTLCONF_webserver_api_password}
       - FTLCONF_dns_listeningMode=ALL
     cap_add:
       - NET_ADMIN
@@ -108,11 +108,11 @@ services:
     command: --quiet --wiredTigerCacheSizeGB 0.25
     restart: unless-stopped
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin # change 
-      - MONGO_INITDB_ROOT_PASSWORD=admin # change
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME} 
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
     volumes:
-      - mongo:/data/db
-      - mongo-config:/data/configdb
+      - komodo_mongo:/data/db
+      - komodo_mongo_config:/data/configdb
 
   core:
     image: ghcr.io/moghtech/komodo-core:latest
@@ -125,26 +125,26 @@ services:
     ports:
       - 1027:9120
     environment:
-      - KOMODO_INIT_ADMIN_USERNAME=admin # change
-      - KOMODO_INIT_ADMIN_PASSWORD=changeme # change
-      - KOMODO_WEBHOOK_SECRET=a_random_secret # change
-      - KOMODO_JWT_SECRET=a_random_jwt_secret # change
-      - KOMODO_DATABASE_USERNAME=admin # change
-      - KOMODO_DATABASE_PASSWORD=admin # change
-      - KOMODO_DB_USERNAME=admin # change
-      - KOMODO_DB_PASSWORD=admin # change
-      - KOMODO_PASSKEY=a_random_passkey # change
+      - KOMODO_INIT_ADMIN_USERNAME=${KOMODO_INIT_ADMIN_USERNAME}
+      - KOMODO_INIT_ADMIN_PASSWORD=${KOMODO_INIT_ADMIN_PASSWORD}
+      - KOMODO_WEBHOOK_SECRET=${KOMODO_WEBHOOK_SECRET}
+      - KOMODO_JWT_SECRET=${KOMODO_JWT_SECRET}
+      - KOMODO_DATABASE_USERNAME=${KOMODO_DATABASE_USERNAME}
+      - KOMODO_DATABASE_PASSWORD=${KOMODO_DATABASE_PASSWORD}
+      - KOMODO_DB_USERNAME=${KOMODO_DB_USERNAME}
+      - KOMODO_DB_PASSWORD=${KOMODO_DB_PASSWORD}
+      - KOMODO_PASSKEY=${KOMODO_PASSKEY}
       - KOMODO_DATABASE_ADDRESS=mongo:27017
       - TZ=Etc/UTC
       - KOMODO_HOST=https://demo.komo.do
-      - KOMODO_TITLE=Komodo
+      - KOMODO_TITLE=dblocks
       - KOMODO_FIRST_SERVER=https://periphery:8120
       - KOMODO_FIRST_SERVER_NAME=Local
-      - KOMODO_DISABLE_CONFIRM_DIALOG=false
       - KOMODO_MONITORING_INTERVAL=15-sec
       - KOMODO_RESOURCE_POLL_INTERVAL=1-hr
       - KOMODO_JWT_TTL=1-day
       - KOMODO_LOCAL_AUTH=true
+      - KOMODO_DISABLE_CONFIRM_DIALOG=false
       - KOMODO_DISABLE_USER_REGISTRATION=false
       - KOMODO_ENABLE_NEW_USERS=false
       - KOMODO_DISABLE_NON_ADMIN_CREATE=false
@@ -154,7 +154,6 @@ services:
       - KOMODO_OIDC_ENABLED=false
       - KOMODO_GITHUB_OAUTH_ENABLED=false
       - KOMODO_GOOGLE_OAUTH_ENABLED=false
-
     volumes:
       - komodo:/backups
 
@@ -165,12 +164,12 @@ services:
       komodo.skip: 
     restart: unless-stopped
     environment:
-      - PERIPHERY_PASSKEYS=a_random_passkey  # change
+      - PERIPHERY_PASSKEYS=${PERIPHERY_PASSKEYS}
       - PERIPHERY_ROOT_DIRECTORY=/etc/komodo
-      - PERIPHERY_DISABLE_TERMINALS=false
-      - PERIPHERY_SSL_ENABLED=true
       - PERIPHERY_INCLUDE_DISK_MOUNTS=/etc/hostname
+      - PERIPHERY_SSL_ENABLED=true
       - PERIPHERY_LOGGING_PRETTY=false
+      - PERIPHERY_DISABLE_TERMINALS=false
       - PERIPHERY_PRETTY_STARTUP_CONFIG=false
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -185,7 +184,7 @@ services:
       image: openspeedtest/latest
 
   portainer:
-    container_name: docker
+    container_name: portainer
     image: portainer/portainer-ce:lts
     restart: always
     ports:
