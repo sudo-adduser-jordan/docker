@@ -4,13 +4,10 @@
     local_certs
 }
 
-
-
 network.dblocks.net {
     tls internal
     reverse_proxy 10.0.0.5:1024
 } 
-
 
 adblock.dblocks.net {
     tls internal
