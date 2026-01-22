@@ -1,17 +1,10 @@
 # dblock 
 
-# networks:
-#   network-proxy: 
-#   network-internal: 
-
 volumes:
   adblock:
   portainer:
   git:
   git-runner:
-  komodo:
-  komodo_mongo:
-  komodo_mongo_config:
   caddy_data:
   caddy_config:
 
@@ -21,19 +14,75 @@ services:
     container_name: proxy
     image: caddy:latest
     restart: unless-stopped
-    network_mode: host
+    ports:
+      # - "80:80"
+      - "443:443"
+
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./certificates:/data/caddy/certificates
-      - ./ca-certificates:/usr/local/share/ca-certificates
-      - ./etc/ssl/certs:/etc/ssl/certs
       - ./caddy_data:/data
       - ./caddy_config:/config
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./etc/ssl/certs:/etc/ssl/certs
+      # - ./certificates:/data/caddy/certificates
       - ./ca-certificates:/usr/local/share/ca-certificates
 
+  git:
+    image: codeberg.org/forgejo/forgejo:13
+    container_name: git
+    restart: always
+    environment:
+      - FORGEJO__server__ROOT_URL=https://git.dblocks.net/
+      # - FORGEJO__server__ROOT_URL=http://git.dblocks.net:1026/
+      # - FORGEJO__server__HTTP_PORT=3000
+      - FORGEJO__server__DOMAIN=git.dblocks.net
+    ports:
+      - 1026:3000
+      - 222:22
+    volumes:
+      - git:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
+  docker-in-docker:
+    image: docker:dind
+    container_name: git-docker
+    privileged: 'true'
+    restart: 'unless-stopped'
+    command: ['dockerd', '-H', 'tcp://0.0.0.0:2375', '--tls=false']
+
+  runner:
+    image: data.forgejo.org/forgejo/runner:12
+    container_name: git-runner
+    links:
+      - docker-in-docker
+    depends_on:
+      docker-in-docker:
+        condition: service_started
+    environment:
+      - DOCKER_HOST=tcp://docker-in-docker:2375
+    volumes:
+      - git-runner:/data
+      - ./etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
+    restart: unless-stopped
+    extra_hosts:
+      - "git.dblocks.net:host-gateway"
+      # - git.dblocks.net:10.0.0.5
+    command: ["sh", "-c", "sleep 5; forgejo-runner daemon"]
+    # command: '/bin/sh -c "while : ; do sleep 1 ; done ;"'
+    # command: '/bin/sh -c "sleep 5; forgejo-runner daemon"'
 
 
-      
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce:lts
+    restart: always
+    ports:
+      - 1029:9443
+    volumes:
+      - portainer:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+
+
   atlas:
     image: keinstien/atlas:latest
     container_name: network
@@ -67,160 +116,4 @@ services:
       - SYS_NICE
     volumes:
       - adblock:/etc/pihole
-
-
-
-
-
-
-  git:
-    image: codeberg.org/forgejo/forgejo:13
-    container_name: git
-    restart: always
-    environment:
-      - FORGEJO__server__ROOT_URL=https://git.dblocks.net/
-    #   - FORGEJO__server__ROOT_URL=https://git.dblocks.net:1026/
-      # - FORGEJO__server__HTTP_PORT=3000
-      - FORGEJO__server__DOMAIN=git.dblocks.net
-    ports:
-      - 1026:3000
-      - 222:22
-    volumes:
-      - git:/data
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
-
-  docker-in-docker:
-    image: docker:dind
-    container_name: git-docker
-    privileged: 'true'
-    restart: 'unless-stopped'
-    command: ['dockerd', '-H', 'tcp://0.0.0.0:2375', '--tls=false']
-
-  runner:
-    image: data.forgejo.org/forgejo/runner:12
-    container_name: git-runner
-    links:
-      - docker-in-docker
-    depends_on:
-      docker-in-docker:
-        condition: service_started
-    environment:
-      # - GIT_SSL_CAINFO=/etc/ssl/certs/ca-certificates.crt
-      - DOCKER_HOST=tcp://docker-in-docker:2375
-    volumes:
-    #   - ./data:/data
-      - git-runner:/data
-      # - ./caddy_data/caddy/pki/authorities/local/root.crt:/usr/local/share/ca-certificates/caddy-root.crt:ro
-      # - ./caddy_data/caddy/pki/authorities/local/root.crt:/etc/ssl/certs/ca-certificates.crt:ro
-      - ./etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
-    #   - ./caddy_data/caddy/pki/authorities/local/root.crt:/usr/local/share/ca-certificates/caddy-root.crt:ro
-    #   - ./caddy_data/caddy/pki/authorities/local/root.crt:/etc/ssl/certs/ca-certificates.crt:ro
-    restart: unless-stopped
-    command: ["sh", "-c", "sleep 5; forgejo-runner daemon"]
-    extra_hosts:
-      - "git.dblocks.net:host-gateway"
-      # - "git.dblocks.net:172.17.0.1"
-      # - git.dblocks.net:10.0.0.5
-
-
-    # command: '/bin/sh -c "while : ; do sleep 1 ; done ;"'
-    # command: '/bin/sh -c "sleep 5; forgejo-runner daemon"'
-
-
-
-
-
-  mongo:
-    image: mongo
-    container_name: build-database
-    labels:
-      komodo.skip: 
-    command: --quiet --wiredTigerCacheSizeGB 0.25
-    restart: unless-stopped
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME} 
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
-    volumes:
-      - komodo_mongo:/data/db
-      - komodo_mongo_config:/data/configdb
-
-  core:
-    image: ghcr.io/moghtech/komodo-core:latest
-    container_name: build
-    labels:
-      komodo.skip: 
-    restart: unless-stopped
-    depends_on:
-      - mongo
-    ports:
-      - 1027:9120
-    environment:
-      - KOMODO_INIT_ADMIN_USERNAME=${KOMODO_INIT_ADMIN_USERNAME}
-      - KOMODO_INIT_ADMIN_PASSWORD=${KOMODO_INIT_ADMIN_PASSWORD}
-      - KOMODO_WEBHOOK_SECRET=${KOMODO_WEBHOOK_SECRET}
-      - KOMODO_JWT_SECRET=${KOMODO_JWT_SECRET}
-      - KOMODO_DATABASE_USERNAME=${KOMODO_DATABASE_USERNAME}
-      - KOMODO_DATABASE_PASSWORD=${KOMODO_DATABASE_PASSWORD}
-      - KOMODO_DB_USERNAME=${KOMODO_DB_USERNAME}
-      - KOMODO_DB_PASSWORD=${KOMODO_DB_PASSWORD}
-      - KOMODO_PASSKEY=${KOMODO_PASSKEY}
-      - KOMODO_DATABASE_ADDRESS=mongo:27017
-      - TZ=Etc/UTC
-      - KOMODO_HOST=https://demo.komo.do
-      - KOMODO_TITLE=dblocks
-      - KOMODO_FIRST_SERVER=https://periphery:8120
-      - KOMODO_FIRST_SERVER_NAME=Local
-      - KOMODO_MONITORING_INTERVAL=15-sec
-      - KOMODO_RESOURCE_POLL_INTERVAL=1-hr
-      - KOMODO_JWT_TTL=1-day
-      - KOMODO_LOCAL_AUTH=true
-      - KOMODO_DISABLE_CONFIRM_DIALOG=false
-      - KOMODO_DISABLE_USER_REGISTRATION=false
-      - KOMODO_ENABLE_NEW_USERS=false
-      - KOMODO_DISABLE_NON_ADMIN_CREATE=false
-      - KOMODO_TRANSPARENT_MODE=false
-      - KOMODO_LOGGING_PRETTY=false
-      - KOMODO_PRETTY_STARTUP_CONFIG=false
-      - KOMODO_OIDC_ENABLED=false
-      - KOMODO_GITHUB_OAUTH_ENABLED=false
-      - KOMODO_GOOGLE_OAUTH_ENABLED=false
-    volumes:
-      - komodo:/backups
-
-  periphery:
-    image: ghcr.io/moghtech/komodo-periphery:latest
-    container_name: build-periphery
-    labels:
-      komodo.skip: 
-    restart: unless-stopped
-    environment:
-      - PERIPHERY_PASSKEYS=${PERIPHERY_PASSKEYS}
-      - PERIPHERY_ROOT_DIRECTORY=/etc/komodo
-      - PERIPHERY_INCLUDE_DISK_MOUNTS=/etc/hostname
-      - PERIPHERY_SSL_ENABLED=true
-      - PERIPHERY_LOGGING_PRETTY=false
-      - PERIPHERY_DISABLE_TERMINALS=false
-      - PERIPHERY_PRETTY_STARTUP_CONFIG=false
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /proc:/proc
-      - /etc/komodo:/etc/komodo
-
-  speed:
-      restart: unless-stopped
-      container_name: speed
-      ports:
-          - 1028:3000
-      image: openspeedtest/latest
-
-  portainer:
-    container_name: portainer
-    image: portainer/portainer-ce:lts
-    restart: always
-    ports:
-      - 1029:9443
-    volumes:
-      - portainer:/data
-      - /var/run/docker.sock:/var/run/docker.sock
 

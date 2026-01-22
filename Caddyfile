@@ -13,11 +13,11 @@ adblock.dblocks.net {
     tls internal
     redir / /admin/login 302
     reverse_proxy 10.0.0.5:1025
-} 
+}
 
 git.dblocks.net {
     tls internal
-    reverse_proxy 10.0.0.5:1026
+    reverse_proxy git:3000
 }
 
 build.dblocks.net {
