@@ -104,13 +104,13 @@ services:
       bash -c '
       /usr/bin/s6-svscan /etc/s6 &
       sleep 10 ;
-      su -c "forgejo forgejo-cli actions register --keep-labels --secret {SHARED_SECRET}" git ;
+      su -c "forgejo forgejo-cli actions register --keep-labels --secret 1cef0f89214cd3fe46877dadf1eef268696a266f" git ;
       # su -c "forgejo admin user create --admin --username root --password {ROOT_PASSWORD} --email root@example.com" git ;
       sleep infinity
       '
     environment:
       FORGEJO__security__INSTALL_LOCK: "true"
-      FORGEJO__log__LEVEL: "debug"
+      # FORGEJO__log__LEVEL: "debug"
       FORGEJO__repository__ENABLE_PUSH_CREATE_USER: "true"
       FORGEJO__repository__DEFAULT_PUSH_CREATE_PRIVATE: "false"
       FORGEJO__repository__DEFAULT_REPO_UNITS: "repo.code,repo.actions"
@@ -128,7 +128,7 @@ services:
     command: >-
       bash -ec '
       while : ; do
-        forgejo-runner create-runner-file --connect --instance http://git:3000 --name runner --secret {SHARED_SECRET} && break ;
+        forgejo-runner create-runner-file --connect --instance http://git:3000 --name runner --secret 1cef0f89214cd3fe46877dadf1eef268696a266f && break ;
         sleep 1 ;
       done ;
       sed -i -e "s|\"labels\": null|\"labels\": [\"docker-cli:docker://code.forgejo.org/oci/docker:cli\",\"node-bookworm:docker://code.forgejo.org/oci/node:20-bookworm\"]|" .runner ;
@@ -159,8 +159,8 @@ services:
       while : ; do test -w .runner && forgejo-runner --config config.yml daemon ; sleep 1 ; done
       '
     container_name: git-runner
-    # extra_hosts:
-      # - git.dblocks.net:10.0.0.5
+    extra_hosts:
+      - git.dblocks.net:10.0.0.5
 
   mongo:
     image: mongo
