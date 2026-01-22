@@ -4,7 +4,6 @@ A simple self hosted solution for developers.
 
 
 ```sh
-
 # download
 git https://github.com/sudo-adduser-jordan/docker; cd docker 
 
@@ -12,15 +11,20 @@ git https://github.com/sudo-adduser-jordan/docker; cd docker
 docker compose up -d
 
 # registir git runner
-docker exec -it git-runner forgejo-runner register # https://git:3000
+docker exec -it git-runner forgejo-runner register # https://git:dblocks.net
+
+# configure git to use local ssl
+git config --global http.sslCAInfo /docker/certificates/local/git.dblocks.net/git.dblocks.net.crt 
 
 # backup
-# sudo cp /var/lib/docker/volumes /path/to/your/backups
+cp /var/lib/docker/volumes /path/to/your/backups
 
 ```
 
+or
+
 ```sh
-# source <(curl https://dblocks.net/server)
+source <(curl https://dblocks.net/install)
 ```
 
 # programs
@@ -32,24 +36,6 @@ portainer # docker.exampledomain.com
 forgejo # git.exampledomain.com
 komodo # build.exampledomain.com
 openspeedtest # speed.example.domain.com
-
-```
-
-
-# commands
-```sh
-# local ssl generate
-openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -nodes # not reccommended, use caddy certificate instead
-
-# download local ssl
-
-# setup local ssl 
-git config http.sslVerify false # not reccommended
-git config --global http.sslCAInfo /root/git-dblocks-net.pem 
-# git config --system http.sslCAInfo /root/git-dblocks-net.pem 
-
-# registir runner 
-docker exec -it git-runner forgejo-runner register # https://git:3000
 
 ```
 
