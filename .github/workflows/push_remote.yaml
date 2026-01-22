@@ -11,25 +11,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # - name: Configure Git
-      #   run: |
-      #     git config --global user.name "jordan"
-      #     git config --global user.email "sudo-adduser-jordan@gmail.com"
+      - name: Configure Git
+        run: |
+          git config --global user.name "jordan"
+          git config --global user.email "sudo-adduser-jordan@gmail.com"
 
-      # # Add remote for GitHub
-      # - name: Add GitHub remote
-      #   run: |
-      #     git remote add github https://github.com/{github-owner}/{github-repo}.git
+      # Add remote for GitHub
+      - name: Add GitHub remote
+        run: |
+          git remote add github https://github.com/{github-owner}/{github-repo}.git
 
-      # # Add remote for GitLab
-      # - name: Add GitLab remote
-      #   run: |
-      #     git remote add gitlab https://gitlab.com/{gitlab-namespace}/{gitlab-repo}.git
+      # Add remote for GitLab
+      - name: Add GitLab remote
+        run: |
+          git remote add gitlab https://gitlab.com/{gitlab-namespace}/{gitlab-repo}.git
 
-      # # Add remote for Codeberg
-      # - name: Add Codeberg remote
-      #   run: |
-      #     git remote add codeberg https://codeberg.org/{codeberg-namespace}/{codeberg-repo}.git
+      # Add remote for Codeberg
+      - name: Add Codeberg remote
+        run: |
+          git remote add codeberg https://codeberg.org/{codeberg-namespace}/{codeberg-repo}.git
 
       # - name: Push to all remotes
       #   env:
