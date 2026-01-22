@@ -1,0 +1,4 @@
+container:
+  options: "-v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro -e NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt"
+  valid_volumes:
+    - "/etc/ssl/certs/ca-certificates.crt"

@@ -67,28 +67,6 @@ services:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-  docker-in-docker:
-    image: code.forgejo.org/oci/docker:dind
-    hostname: docker  # Must set hostname as TLS certificates are only valid for docker or localhost
-    privileged: true
-    environment:
-      DOCKER_TLS_CERTDIR: /certs
-      DOCKER_HOST: docker-in-docker
-    volumes:
-      - ./certificates/local/git.dblocks.net/:/certs/
-
   git:
     image: codeberg.org/forgejo/forgejo:13
     restart: always
@@ -115,52 +93,46 @@ services:
       FORGEJO__repository__DEFAULT_PUSH_CREATE_PRIVATE: "false"
       FORGEJO__repository__DEFAULT_REPO_UNITS: "repo.code,repo.actions"
 
-  runner-register:
-    image: code.forgejo.org/forgejo/runner:12.5.3
-    links:
-      - docker-in-docker
-      - git
-    environment:
-      DOCKER_HOST: tcp://docker-in-docker:2376
-    volumes:
-      - /srv/runner-data:/data
-    user: 0:0
-    command: >-
-      bash -ec '
-      while : ; do
-        forgejo-runner create-runner-file --connect --instance http://git:3000 --name runner --secret 1cef0f89214cd3fe46877dadf1eef268696a266f && break ;
-        sleep 1 ;
-      done ;
-      sed -i -e "s|\"labels\": null|\"labels\": [\"docker-cli:docker://code.forgejo.org/oci/docker:cli\",\"node-bookworm:docker://code.forgejo.org/oci/node:20-bookworm\"]|" .runner ;
-      forgejo-runner generate-config > config.yml ;
-      sed -i -e "s|  level: info|  level: debug|" config.yml ;
-      sed -i -e "s|network: .*|network: host|" config.yml ;
-      sed -i -e "s|^  envs:$$|  envs:\n    DOCKER_HOST: tcp://docker:2376\n    DOCKER_TLS_VERIFY: 1\n    DOCKER_CERT_PATH: /certs/client|" config.yml ;
-      sed -i -e "s|^  options:|  options: -v /certs/client:/certs/client|" config.yml ;
-      sed -i -e "s|  valid_volumes: \[\]$$|  valid_volumes:\n    - /certs/client|" config.yml ;
-      chown -R 1000:1000 /data
-      '
+  docker-in-docker:
+    hostname: docker  # Must set hostname as TLS certificates are only valid for docker or localhost
+    image: docker:dind
+    container_name: git-docker
+    privileged: 'true'
+    command: ['dockerd', '-H', 'tcp://0.0.0.0:2375', '--tls=false']
+    restart: 'unless-stopped'
 
-  git-runner:
-    image: code.forgejo.org/forgejo/runner:12.5.3
+  runner:
+    image: data.forgejo.org/forgejo/runner:11
+    container_name: git-runner
     links:
+      - git
       - docker-in-docker
       - git
     environment:
-      DOCKER_HOST: tcp://docker:2376
-      DOCKER_CERT_PATH: /certs/client
-      DOCKER_TLS_VERIFY: "1"
+      DOCKER_HOST: tcp://docker-in-docker:2375
     volumes:
       - git-runner:/data
-      - docker_certs:/certs
-      - ./certificates/local/git.dblocks.net/:/certs/
-    command: >-
-      bash -c '
-      while : ; do test -w .runner && forgejo-runner --config config.yml daemon ; sleep 1 ; done
-      '
-    container_name: git-runner
+      - ./config.yaml:/data/config.yaml
+      - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
+    restart: unless-stopped
+    # command: '/bin/sh -c "while : ; do sleep 1 ; done ;"'
+    command: '/bin/sh -c "sleep 5; forgejo-runner daemon"'
     extra_hosts:
       - git.dblocks.net:10.0.0.5
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   mongo:
     image: mongo
