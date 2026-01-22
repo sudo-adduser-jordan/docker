@@ -15,7 +15,7 @@ services:
     image: caddy:latest
     restart: unless-stopped
     ports:
-      # - "80:80"
+      - "80:80"
       - "443:443"
 
     volumes:
@@ -32,11 +32,12 @@ services:
     restart: always
     environment:
       - FORGEJO__server__ROOT_URL=https://git.dblocks.net/
-      # - FORGEJO__server__ROOT_URL=http://git.dblocks.net:1026/
-      # - FORGEJO__server__HTTP_PORT=3000
-      - FORGEJO__server__DOMAIN=git.dblocks.net
+      # - FORGEJO__server__ROOT_URL=http://git.dblocks.net/
+      - FORGEJO__server__HTTP_PORT=1026
+      - FORGEJO__server__DOMAIN=10.0.0.5
+      # - FORGEJO__server__DOMAIN=git.dblocks.net
     ports:
-      - 1026:3000
+      - 1026:1026
       - 222:22
     volumes:
       - git:/data
@@ -49,12 +50,15 @@ services:
     privileged: 'true'
     restart: 'unless-stopped'
     command: ['dockerd', '-H', 'tcp://0.0.0.0:2375', '--tls=false']
+    extra_hosts:
+      - "git.dblocks.net:10.0.0.5"
 
   runner:
     image: data.forgejo.org/forgejo/runner:12
     container_name: git-runner
     links:
       - docker-in-docker
+      - git
     depends_on:
       docker-in-docker:
         condition: service_started
