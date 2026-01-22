@@ -25,9 +25,15 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./certificates:/data/caddy/certificates
-      - caddy_data:/data
-      - caddy_config:/config
-  
+      - ./ca-certificates:/usr/local/share/ca-certificates
+      - ./etc/ssl/certs:/etc/ssl/certs
+      - ./caddy_data:/data
+      - ./caddy_config:/config
+      - ./ca-certificates:/usr/local/share/ca-certificates
+
+
+
+      
   atlas:
     image: keinstien/atlas:latest
     container_name: network
@@ -69,7 +75,13 @@ services:
 
   git:
     image: codeberg.org/forgejo/forgejo:13
+    container_name: git
     restart: always
+    environment:
+      - FORGEJO__server__ROOT_URL=https://git.dblocks.net/
+    #   - FORGEJO__server__ROOT_URL=https://git.dblocks.net:1026/
+      # - FORGEJO__server__HTTP_PORT=3000
+      - FORGEJO__server__DOMAIN=git.dblocks.net
     ports:
       - 1026:3000
       - 222:22
@@ -77,58 +89,43 @@ services:
       - git:/data
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-    container_name: git
-    command: >-
-      bash -c '
-      /usr/bin/s6-svscan /etc/s6 &
-      sleep 10 ;
-      su -c "forgejo forgejo-cli actions register --keep-labels --secret 1cef0f89214cd3fe46877dadf1eef268696a266f" git ;
-      # su -c "forgejo admin user create --admin --username root --password {ROOT_PASSWORD} --email root@example.com" git ;
-      sleep infinity
-      '
-    environment:
-      FORGEJO__security__INSTALL_LOCK: "true"
-      # FORGEJO__log__LEVEL: "debug"
-      FORGEJO__repository__ENABLE_PUSH_CREATE_USER: "true"
-      FORGEJO__repository__DEFAULT_PUSH_CREATE_PRIVATE: "false"
-      FORGEJO__repository__DEFAULT_REPO_UNITS: "repo.code,repo.actions"
 
   docker-in-docker:
-    hostname: docker  # Must set hostname as TLS certificates are only valid for docker or localhost
     image: docker:dind
     container_name: git-docker
     privileged: 'true'
-    command: ['dockerd', '-H', 'tcp://0.0.0.0:2375', '--tls=false']
     restart: 'unless-stopped'
+    command: ['dockerd', '-H', 'tcp://0.0.0.0:2375', '--tls=false']
 
   runner:
-    image: data.forgejo.org/forgejo/runner:11
+    image: data.forgejo.org/forgejo/runner:12
     container_name: git-runner
     links:
-      - git
       - docker-in-docker
-      - git
+    depends_on:
+      docker-in-docker:
+        condition: service_started
     environment:
-      DOCKER_HOST: tcp://docker-in-docker:2375
+      # - GIT_SSL_CAINFO=/etc/ssl/certs/ca-certificates.crt
+      - DOCKER_HOST=tcp://docker-in-docker:2375
     volumes:
+    #   - ./data:/data
       - git-runner:/data
-      - ./config.yaml:/data/config.yaml
-      - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
+      # - ./caddy_data/caddy/pki/authorities/local/root.crt:/usr/local/share/ca-certificates/caddy-root.crt:ro
+      # - ./caddy_data/caddy/pki/authorities/local/root.crt:/etc/ssl/certs/ca-certificates.crt:ro
+      - ./etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
+    #   - ./caddy_data/caddy/pki/authorities/local/root.crt:/usr/local/share/ca-certificates/caddy-root.crt:ro
+    #   - ./caddy_data/caddy/pki/authorities/local/root.crt:/etc/ssl/certs/ca-certificates.crt:ro
     restart: unless-stopped
-    # command: '/bin/sh -c "while : ; do sleep 1 ; done ;"'
-    command: '/bin/sh -c "sleep 5; forgejo-runner daemon"'
+    command: ["sh", "-c", "sleep 5; forgejo-runner daemon"]
     extra_hosts:
-      - git.dblocks.net:10.0.0.5
+      - "git.dblocks.net:host-gateway"
+      # - "git.dblocks.net:172.17.0.1"
+      # - git.dblocks.net:10.0.0.5
 
 
-
-
-
-
-
-
-
-
+    # command: '/bin/sh -c "while : ; do sleep 1 ; done ;"'
+    # command: '/bin/sh -c "sleep 5; forgejo-runner daemon"'
 
 
 

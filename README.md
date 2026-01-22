@@ -11,7 +11,14 @@ git https://github.com/sudo-adduser-jordan/docker; cd docker
 docker compose up -d
 
 # registir git runner
-docker exec -it git-runner forgejo-runner register # https://git:dblocks.net
+# docker exec -it git-runner forgejo-runner register
+docker exec -it git-runner \
+  forgejo-runner register \
+  --instance https://git.dblocks.net \
+  --token l9spxBt8PuCNhORUpEWpAXZpvoJNzT6zdrgmNL9R \
+  --name "git-runner" \
+  --no-interactive
+
 
 # configure git to use local ssl
 git config --global http.sslCAInfo /docker/certificates/local/git.dblocks.net/git.dblocks.net.crt 
