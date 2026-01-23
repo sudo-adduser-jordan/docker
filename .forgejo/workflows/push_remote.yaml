@@ -13,6 +13,9 @@ jobs:
 
       - name: Configure Git
         run: |
+          echo git config --global user.name "jordan"
+          echo git config --global user.email "sudo-adduser-jordan@gmail.com"
+          
           git config --global user.name "jordan"
           git config --global user.email "sudo-adduser-jordan@gmail.com"
 
