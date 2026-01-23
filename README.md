@@ -11,21 +11,23 @@ git https://github.com/sudo-adduser-jordan/docker; cd docker
 docker compose up -d
 
 # registir git runner
-# docker exec -it git-runner forgejo-runner register
 docker exec -it git-runner \
   forgejo-runner register \
   --instance https://git.dblocks.net \
-  --token l9spxBt8PuCNhORUpEWpAXZpvoJNzT6zdrgmNL9R \
+  --token THISTOKENISFROMTHEWEBINTERFACE \
   --name "git-runner" \
   --no-interactive
-
-
-# configure git to use local ssl
-git config --global http.sslCAInfo /docker/certificates/local/git.dblocks.net/git.dblocks.net.crt 
 
 # backup
 cp /var/lib/docker/volumes /path/to/your/backups
 
+# configure client to use local ssl
+cp ./etc/hosts /etc/hosts 
+cp ./etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt 
+update-ca-certificates
+
+# piehole with filter the host device
+# to have pihole filter your entire network you must point your router to your hosts internal ip in the router settings
 ```
 
 or
@@ -67,9 +69,8 @@ https://emasblog.dev/posts/2025/11/forgejo-runners-container-setup/
 
 # todo
 ```sh
-
 - vpn
-
+- regisitir runner automagically
 ```
 
 
