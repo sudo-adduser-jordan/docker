@@ -43,6 +43,13 @@ jobs:
           echo git push https://$GITHUB_TOKEN@github.com/${{ github.repository }}.git
           git push https://$GITHUB_TOKEN@github.com/${{ github.repository }}.git
 
+      - name: Push to Codeberg
+        env:
+          CODEBERG_TOKEN: ${{ secrets.TOKEN_CODEBERG }}
+        run: |
+          echo git push https://$CODEBERG_TOKEN@codeberg.org/${{ github.repository }}.git
+          git push https://$CODEBERG_TOKEN@codeberg.org/${{ github.repository }}.git
+   
       - name: Push to GitLab
         env:
           GITLAB_TOKEN: ${{ secrets.TOKEN_GITLAB }}
@@ -52,11 +59,4 @@ jobs:
 
           # echo git push https://$GITLAB_TOKEN@gitlab.com/${{ github.repository }}.git
           # git push https://$GITLAB_TOKEN@gitlab.com/${{ github.repository }}.git
-
-      - name: Push to Codeberg
-        env:
-          CODEBERG_TOKEN: ${{ secrets.TOKEN_CODEBERG }}
-        run: |
-          echo git push https://$CODEBERG_TOKEN@codeberg.org/${{ github.repository }}.git
-          git push https://$CODEBERG_TOKEN@codeberg.org/${{ github.repository }}.git
-          
+       
