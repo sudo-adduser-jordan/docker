@@ -18,15 +18,18 @@ jobs:
 
       - name: Add GitHub remote
         run: |
-          git remote add github https://github.com/${{ github.repository }}.
+          echo https://github.com/${{ github.repository }}.git
+          git remote add github https://github.com/${{ github.repository }}.git
 
       - name: Add GitLab remote
         run: |
-          git remote add gitlab https://gitlab.com/${{ github.repository }}.
+          echo https://gitlab.com/${{ github.repository }}.git
+          git remote add gitlab https://gitlab.com/${{ github.repository }}.git
 
       - name: Add Codeberg remote
         run: |
-          git remote add codeberg https://codeberg.org/${{ github.repository }}.
+          echo https://codeberg.org/${{ github.repository }}.git
+          git remote add codeberg https://codeberg.org/${{ github.repository }}.git
 
       - name: Push to all remotes
         env:
