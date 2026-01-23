@@ -16,17 +16,14 @@ jobs:
           git config --global user.name "jordan"
           git config --global user.email "sudo-adduser-jordan@gmail.com"
 
-      # Add remote for GitHub
       - name: Add GitHub remote
         run: |
           git remote add github https://github.com/{github-owner}/{github-repo}.git
 
-      # Add remote for GitLab
       - name: Add GitLab remote
         run: |
           git remote add gitlab https://gitlab.com/{gitlab-namespace}/{gitlab-repo}.git
 
-      # Add remote for Codeberg
       - name: Add Codeberg remote
         run: |
           git remote add codeberg https://codeberg.org/{codeberg-namespace}/{codeberg-repo}.git
@@ -37,11 +34,9 @@ jobs:
       #     GITLAB_TOKEN: ${{ secrets.GITLAB_PUSH_TOKEN }}
       #     CODEBERG_TOKEN: ${{ secrets.CODEBERG_PUSH_TOKEN }}
       #   run: |
-      #     # Push to GitHub
       #     git push https://$GITHUB_TOKEN@github.com/{github-owner}/{github-repo}.git HEAD:main
-          
-      #     # Push to GitLab
+
+      #     git push https://$CODEBERG_TOKEN@codeberg.org/{codeberg-namespace}/{codeberg-repo}.git HEAD:main
+
       #     git push https://$GITLAB_TOKEN@gitlab.com/{gitlab-namespace}/{gitlab-repo}.git HEAD:main
           
-      #     # Push to Codeberg
-      #     git push https://$CODEBERG_TOKEN@codeberg.org/{codeberg-namespace}/{codeberg-repo}.git HEAD:main
