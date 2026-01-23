@@ -12,6 +12,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
             fetch-depth: 0  # This fetches all history for all branches and tags
+
       - name: Configure Git
         run: |
           echo git config --global user.name "jordan"
@@ -22,17 +23,17 @@ jobs:
 
       - name: Add GitHub remote
         run: |
-          echo https://github.com/${{ github.repository }}.git
+          echo git remote add github https://github.com/${{ github.repository }}.git
           git remote add github https://github.com/${{ github.repository }}.git
 
       - name: Add GitLab remote
         run: |
-          echo https://gitlab.com/${{ github.repository }}.git
+          echo git remote add gitlab https://gitlab.com/${{ github.repository }}.git
           git remote add gitlab https://gitlab.com/${{ github.repository }}.git
 
       - name: Add Codeberg remote
         run: |
-          echo https://codeberg.org/${{ github.repository }}.git
+          echo git remote add codeberg https://codeberg.org/${{ github.repository }}.git
           git remote add codeberg https://codeberg.org/${{ github.repository }}.git
 
       - name: Push to all remotes
@@ -41,8 +42,13 @@ jobs:
           GITLAB_TOKEN: ${{ secrets.TOKEN_GITLAB }}
           CODEBERG_TOKEN: ${{ secrets.TOKEN_CODEBERG }}
         run: |
+          echo git push https://$GITHUB_TOKEN@github.com/${{ github.repository }}.git
           git push https://$GITHUB_TOKEN@github.com/${{ github.repository }}.git
+          
+          echo git push https://$GITLAB_TOKEN@gitlab.com/${{ github.repository }}.git
           git push https://$GITLAB_TOKEN@gitlab.com/${{ github.repository }}.git
+          
+          echo git push https://$CODEBERG_TOKEN@codeberg.org/${{ github.repository }}.git
           git push https://$CODEBERG_TOKEN@codeberg.org/${{ github.repository }}.git
 
 
