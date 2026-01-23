@@ -11,15 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-
-
-
-
-
       - name: Configure Git
         run: |
           git config --global user.name "jordan"
@@ -43,7 +34,6 @@ jobs:
           GITLAB_TOKEN: ${{ secrets.TOKEN_GITLAB }}
           CODEBERG_TOKEN: ${{ secrets.TOKEN_CODEBERG }}
         run: |
-          git push https://$GITHUB_TOKEN@github.com/{github-owner}/{github-repo}.git 
-          git push https://$CODEBERG_TOKEN@codeberg.org/{codeberg-namespace}/{codeberg-repo}.git 
-          git push https://$GITLAB_TOKEN@gitlab.com/{gitlab-namespace}/{gitlab-repo}.git 
-          
+          git push https://$GITHUB_TOKEN@github.com/${{ github.repository }}.git
+          git push https://$GITLAB_TOKEN@gitlab.com/${{ github.repository }}.git
+          git push https://$CODEBERG_TOKEN@codeberg.org/${{ github.repository }}.git
