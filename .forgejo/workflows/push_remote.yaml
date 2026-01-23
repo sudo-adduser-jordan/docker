@@ -34,6 +34,6 @@ jobs:
           GITLAB_TOKEN: ${{ secrets.TOKEN_GITLAB }}
           CODEBERG_TOKEN: ${{ secrets.TOKEN_CODEBERG }}
         run: |
-          git push git push origin main https://$GITHUB_TOKEN@github.com/${{ github.repository }}
-          git push git push origin main https://$GITLAB_TOKEN@gitlab.com/${{ github.repository }}
-          git push git push origin main https://$CODEBERG_TOKEN@codeberg.org/${{ github.repository }}
+          git push origin main https://$GITHUB_TOKEN@github.com/${{ github.repository }}
+          git push origin main https://$GITLAB_TOKEN@gitlab.com/${{ github.repository }}
+          git push origin main https://$CODEBERG_TOKEN@codeberg.org/${{ github.repository }}
