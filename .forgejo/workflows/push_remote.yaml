@@ -7,7 +7,7 @@ on:
 
 jobs:
   push:
-    if: github.server_url == 'https://git.dblocks.net'
+    if: github.server_url == 'https://10.0.0.5:1026'
     runs-on: docker
     steps:
       - uses: actions/checkout@v4
