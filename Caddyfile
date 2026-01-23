@@ -1,6 +1,4 @@
 {
-    # Global options: Use internal CA for all sites by default
-    # This prevents Caddy from trying to reach Let's Encrypt for .net domains
     local_certs
 }
 
