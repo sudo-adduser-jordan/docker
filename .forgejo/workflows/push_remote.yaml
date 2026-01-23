@@ -54,9 +54,6 @@ jobs:
         env:
           GITLAB_TOKEN: ${{ secrets.TOKEN_GITLAB }}
         run: |
-          echo git push --set-upstream https://gitlab.com/${{ github.repository }}.git
-          git push --set-upstream https://gitlab.com/${{ github.repository }}.git
-
-          # echo git push https://$GITLAB_TOKEN@gitlab.com/${{ github.repository }}.git
-          # git push https://$GITLAB_TOKEN@gitlab.com/${{ github.repository }}.git
+          echo git push https://$GITLAB_TOKEN@gitlab.com/${{ github.repository }}.git
+          git push https://$GITLAB_TOKEN@gitlab.com/${{ github.repository }}.git
        
