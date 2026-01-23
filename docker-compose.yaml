@@ -4,6 +4,7 @@ volumes:
   adblock:
   portainer:
   git:
+  git-runner:
   komodo:
   komodo_mongo:
   komodo_mongo_config:
@@ -79,7 +80,6 @@ services:
     restart: unless-stopped
     extra_hosts:
       - git.dblocks.net:10.0.0.5
-    # command: '/bin/sh -c "while : ; do sleep 1 ; done ;"'
     command: 'sh -c "forgejo-runner daemon"'
 
   portainer:

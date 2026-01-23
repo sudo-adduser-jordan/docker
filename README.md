@@ -13,8 +13,8 @@ docker compose up -d
 # registir git runner
 docker exec -it git-runner \
   forgejo-runner register \
-  --instance https://git.dblocks.net \
-  --token THISTOKENISFROMTHEWEBINTERFACE \
+  --instance http://10.0.0.5:1026 \
+  --token APBxfp1mfQdxywGcxk4Hymu1jb4XEbeFjmp0UfIa \
   --name "git-runner" \
   --no-interactive
 
