@@ -26,6 +26,10 @@ cp ./etc/hosts /etc/hosts
 cp ./etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt 
 update-ca-certificates
 
+# sudo cp caddy-local-authority--ecc-intermediate.pem /etc/pki/ca-trust/source/anchors/
+# sudo update-ca-trust extract
+
+
 # piehole with filter the host device
 # to have pihole filter your entire network you must point your router to your hosts internal ip in the router settings
 ```
