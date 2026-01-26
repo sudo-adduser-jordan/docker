@@ -48,5 +48,5 @@ jobs:
           echo git remote add gitlab https://gitlab.com/${{ github.repository }}.git
           git remote add gitlab https://gitlab.com/${{ github.repository }}.git
 
-          echo git push -f https://server:$GITLAB_TOKEN@gitlab.com/${{ github.repository }}.git
-          git push -f https://server:$GITLAB_TOKEN@gitlab.com/${{ github.repository }}.git
+          echo git push  https://server:$GITLAB_TOKEN@gitlab.com/${{ github.repository }}.git
+          git push  https://server:$GITLAB_TOKEN@gitlab.com/${{ github.repository }}.git
