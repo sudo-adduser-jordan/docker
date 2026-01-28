@@ -40,7 +40,7 @@ or
 source <(curl https://dblocks.net/install)
 ```
 
-# programs
+## programs
 ```sh
 
 network # network.exampledomain.com
@@ -52,7 +52,7 @@ openspeedtest # speed.example.domain.com
 
 ```
 
-# resources
+## resources
 ```sh
 
 # programs
@@ -71,7 +71,7 @@ https://emasblog.dev/posts/2025/11/forgejo-runners-container-setup/
 
 ```
 
-# todo
+## todo
 ```sh
 - vpn
 - regisitir runner automagically
