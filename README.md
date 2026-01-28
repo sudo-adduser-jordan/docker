@@ -14,7 +14,7 @@ docker compose up -d
 docker exec -it git-runner \
   forgejo-runner register \
   --instance http://10.0.0.5:1026 \
-  --token APBxfp1mfQdxywGcxk4Hymu1jb4XEbeFjmp0UfIa \
+  --token hOmDhkqMMwVxGPtNXEh8Kx3NqB4gvRwUvKV6TlOC \
   --name "git-runner" \
   --no-interactive
 
