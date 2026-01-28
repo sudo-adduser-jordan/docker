@@ -15,11 +15,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          
-          fetch-depth: 0 # Super-Linter needs full git history to lint only changed files
+          fetch-depth: 0 
 
       - name: Lint Code Base
         uses: https://github.com/github/super-linter@v5
         env:
           DEFAULT_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is automatically provided by Forgejo
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
