@@ -8,7 +8,9 @@ volumes:
   komodo:
   komodo_mongo:
   komodo_mongo_config:
-  
+  database:
+      POSTGRES_DB: your_database
+
 services:
 
   adblock:
@@ -193,5 +195,15 @@ services:
       ports:
         - 1028:3000
 
-
-      
+  # postgres:
+  #   image: postgres:latest
+  #   container_name: database
+  #   restart: always
+  #   ports:
+  #     - 5432:5432
+  #   environment:
+  #     - POSTGRES_DATABASE=${POSTGRES_DATABASE}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #     - POSTGRES_USERNAME=${POSTGRES_USERNAME}
+  #   volumes:
+  #     -  database:/var/lib/postgresql/data
