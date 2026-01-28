@@ -2,13 +2,9 @@ log:
   level: info
   job_level: info
 
-
 runner:
   file: .runner
   capacity: 4
-  # envs:
-    # A_TEST_ENV_NAME_1: a_test_env_value_1
-    # A_TEST_ENV_NAME_2: a_test_env_value_2
   env_file: .env
   timeout: 30m
   shutdown_timeout: 30m
