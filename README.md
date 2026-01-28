@@ -1,7 +1,6 @@
 # docker server
 
-A simple self hosted solution for developers. 
-
+A simple self hosted solution for developers.
 
 ```sh
 # download
@@ -41,6 +40,7 @@ source <(curl https://dblocks.net/install)
 ```
 
 ## programs
+
 ```sh
 
 network # network.exampledomain.com
@@ -53,6 +53,7 @@ openspeedtest # speed.example.domain.com
 ```
 
 ## resources
+
 ```sh
 
 # programs
@@ -72,9 +73,8 @@ https://emasblog.dev/posts/2025/11/forgejo-runners-container-setup/
 ```
 
 ## todo
+
 ```sh
 - vpn
 - regisitir runner automagically
 ```
-
-
