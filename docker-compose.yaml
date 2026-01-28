@@ -19,7 +19,7 @@ services:
     environment:
       - FTLCONF_webserver_port=1025
       - TZ=America/Vancouver
-      - FTLCONF_webserver_api_password=${FTLCONF_webserver_api_password}
+      - FTLCONF_WEBSERVER_API_PASSWORD=${FTLCONF_WEBSERVER_API_PASSWORD}
       - FTLCONF_dns_listeningMode=ALL
     cap_add:
       - NET_ADMIN
