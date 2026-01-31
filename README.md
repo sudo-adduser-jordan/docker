@@ -25,8 +25,20 @@ cp ./etc/hosts /etc/hosts
 cp ./etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt 
 update-ca-certificates
 
+
+# openssl x509 -in caddy-local-authority--ecc-intermediate.pem -inform PEM -out caddy.crt
+# sudo cp caddy.crt /usr/local/share/ca-certificates/
+
+
 # sudo cp caddy-local-authority--ecc-intermediate.pem /etc/pki/ca-trust/source/anchors/
 # sudo update-ca-trust extract
+
+
+
+
+
+
+
 
 
 # piehole with filter the host device
