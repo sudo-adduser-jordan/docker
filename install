@@ -1,0 +1,5 @@
+git clone https://github.com/sudo-adduser-jordan/docker 
+cd docker 
+cp .example.env .env
+sudo docker compose up -d
+sudo resolvectl dns eth0 127.0.0.1 # use pihole for host dns (non-persistent, re-run after reboot)

@@ -1,0 +1,216 @@
+volumes:
+  git:
+  adblock:
+  postgres-data:
+  pgadmin-config:
+  runner-data:
+
+services:
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./etc/ssl/certs:/etc/ssl/certs
+
+  adblock:
+    container_name: adblock
+    image: pihole/pihole:latest
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:53:53/udp
+      - 127.0.0.1:53:53/tcp
+      - 1025:1025
+    environment:
+      - FTLCONF_webserver_port=1025
+      - TZ=America/Vancouver
+      - FTLCONF_WEBSERVER_API_PASSWORD=${FTLCONF_WEBSERVER_API_PASSWORD}
+      - PIHOLE_DNS_=1.1.1.1
+    cap_add:
+      - NET_ADMIN
+      - SYS_TIME
+      - SYS_NICE
+    volumes:
+      - adblock:/etc/pihole
+      # - ./etc/pihole/adlists.list:/etc/pihole/adlists.list
+
+  git:
+    container_name: git
+    image: codeberg.org/forgejo/forgejo:13
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:1026/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    environment:
+      - FORGEJO__server__ROOT_URL=http://localhost:1026
+      - FORGEJO__server__DOMAIN=localhost
+      - FORGEJO__server__HTTP_PORT=1026
+    ports:
+      - 1026:1026
+      - 222:22
+    volumes:
+      - git:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
+  git-runner-init:
+    container_name: git-runner-init
+    image: curlimages/curl
+    user: root
+    restart: "no"
+    depends_on:
+      git:
+        condition: service_healthy
+    environment:
+      FORGEJO_ADMIN_USERNAME: ${FORGEJO_ADMIN_USERNAME:-forgejo-admin}
+      FORGEJO_ADMIN_PASSWORD: ${FORGEJO_ADMIN_PASSWORD:-Admin123!}
+    volumes:
+      - runner-data:/shared
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+      - sh
+      - -c
+      - |
+        set -e
+        TOKEN_FILE="/shared/runner_token"
+        if [ -f "$$TOKEN_FILE" ]; then
+          echo "Runner token already generated, skipping."
+          exit 0
+        fi
+
+        docker_api() { curl -s --unix-socket /var/run/docker.sock "$@"; }
+
+        echo "Waiting for Forgejo web UI..."
+        sleep 3
+
+        PAGE_TITLE=$(curl -sf http://git:1026/ 2>/dev/null | grep -o '<title>[^<]*</title>' | head -1)
+        if echo "$$PAGE_TITLE" | grep -qi "installation"; then
+          echo "Forgejo not installed. Installing..."
+          curl -sf -X POST http://git:1026/ \
+            -d "db_type=sqlite3" \
+            -d "db_path=/data/gitea/gitea.db" \
+            -d "app_name=Forgejo" \
+            -d "app_url=http://localhost:1026" \
+            -d "domain=localhost" \
+            -d "ssh_port=22" \
+            -d "http_port=1026" \
+            -d "repo_root_path=/data/git/repositories" \
+            -d "lfs_root_path=/data/git/lfs" \
+            -d "log_root_path=/data/gitea/log" \
+            -d "run_user=git" \
+            -d "admin_name=${FORGEJO_ADMIN_USERNAME}" \
+            -d "admin_passwd=${FORGEJO_ADMIN_PASSWORD}" \
+            -d "admin_confirm_passwd=${FORGEJO_ADMIN_PASSWORD}" \
+            -d "admin_email=admin@example.com" > /dev/null
+          echo "Installation complete."
+          sleep 3
+        fi
+
+        echo "Generating runner registration token..."
+
+        EXEC_ID=$(docker_api -X POST http://localhost/containers/git/exec \
+          -H "Content-Type: application/json" \
+          -d '{
+            "Cmd": ["su-exec", "git", "forgejo", "forgejo-cli", "actions", "generate-runner-token", "-w", "/data", "--custom-path", "/data/gitea"],
+            "AttachStdout": true,
+            "Tty": true
+          }' | sed -n 's/.*"Id":"\([^"]*\)".*/\1/p')
+
+        if [ -z "$$EXEC_ID" ]; then
+          echo "ERROR: Failed to create exec in git container"
+          exit 1
+        fi
+
+        TOKEN=$(docker_api -X POST http://localhost/exec/$$EXEC_ID/start \
+          -H "Content-Type: application/json" \
+          -d '{"Tty": true}' | tr -d '\r\n' | tr -d '\n')
+
+        if [ -n "$$TOKEN" ] && [ $${#TOKEN} -gt 30 ]; then
+          echo "$$TOKEN" > "$$TOKEN_FILE"
+          echo "Runner token generated."
+        else
+          echo "ERROR: Failed to generate runner token"
+          exit 1
+        fi
+
+  docker-in-docker:
+    image: docker:dind
+    restart: unless-stopped
+    hostname: docker  # Must set hostname as TLS certificates are only valid for docker or localhost
+    privileged: 'true'
+    command: dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --tls=false
+    healthcheck:
+      test: ["CMD", "docker", "info"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  postgres:
+    container_name: postgres
+    image: postgres:16
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:latest
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - 1030:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    volumes:
+      - pgadmin-config:/var/lib/pgadmin
+
+  runner:
+    container_name: git-runner
+    image: data.forgejo.org/forgejo/runner:12
+    restart: unless-stopped
+    depends_on:
+      docker-in-docker:
+        condition: service_healthy
+      git-runner-init:
+        condition: service_completed_successfully
+    environment:
+      - DOCKER_HOST=tcp://docker-in-docker:2375
+    volumes:
+      - ./config.yml:/config.yml
+      - ./etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
+      - runner-data:/shared
+    command:
+      - sh
+      - -c
+      - |
+        if [ ! -f .runner ]; then
+          echo "Registering runner..."
+          forgejo-runner register \
+            --instance http://git:1026 \
+            --token "$(cat /shared/runner_token)" \
+            --name git-runner --no-interactive
+        fi
+        exec forgejo-runner daemon
+
